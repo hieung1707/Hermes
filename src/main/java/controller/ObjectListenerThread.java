@@ -9,6 +9,10 @@ package controller;
  *
  * @author ASUS
  */
-public class ObjectListenerThread {
+public class ObjectListenerThread extends Thread {
     
+    @Override
+    public void run() {
+        
+    }
 }

@@ -147,7 +147,7 @@ public class MainFrm extends javax.swing.JFrame {
             .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 333, Short.MAX_VALUE)
         );
 
-        listGroups.addTab("Groups", jPanel2);
+        listGroups.addTab("Rooms", jPanel2);
 
         btnCreateRoom.setText("Create Room");
         btnCreateRoom.addActionListener(new java.awt.event.ActionListener() {
@@ -207,9 +207,19 @@ public class MainFrm extends javax.swing.JFrame {
             }
         });
 
-        topBtn1.setText("Manage Room");
+        topBtn1.setText("Leave Room");
+        topBtn1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                topBtn1ActionPerformed(evt);
+            }
+        });
 
-        topBtn2.setText("jButton4");
+        topBtn2.setText("Manage Room");
+        topBtn2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                topBtn2ActionPerformed(evt);
+            }
+        });
 
         btnFile.setText("File");
 
@@ -307,6 +317,14 @@ public class MainFrm extends javax.swing.JFrame {
     private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextField2ActionPerformed
+
+    private void topBtn1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_topBtn1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_topBtn1ActionPerformed
+
+    private void topBtn2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_topBtn2ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_topBtn2ActionPerformed
 
     public void setAlias(String alias) {
         lblWelcome.setText("Welcome, "+ alias);

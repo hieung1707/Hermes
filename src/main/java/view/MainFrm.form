@@ -242,8 +242,8 @@
             <Container class="javax.swing.JPanel" name="jPanel2">
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
-                  <JTabbedPaneConstraints tabName="Groups">
-                    <Property name="tabTitle" type="java.lang.String" value="Groups"/>
+                  <JTabbedPaneConstraints tabName="Rooms">
+                    <Property name="tabTitle" type="java.lang.String" value="Rooms"/>
                   </JTabbedPaneConstraints>
                 </Constraint>
               </Constraints>
@@ -399,13 +399,19 @@
         </Component>
         <Component class="javax.swing.JButton" name="topBtn1">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Manage Room"/>
+            <Property name="text" type="java.lang.String" value="Leave Room"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="topBtn1ActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="topBtn2">
           <Properties>
-            <Property name="text" type="java.lang.String" value="jButton4"/>
+            <Property name="text" type="java.lang.String" value="Manage Room"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="topBtn2ActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JTextField" name="txtMsgBox">
         </Component>
