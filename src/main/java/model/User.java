@@ -13,15 +13,37 @@ import java.util.ArrayList;
  * @author ASUS
  */
 public class User implements Serializable {
+    private int id;
     private String alias;
     private String ip;
-    private String port;
+    private int port;
     
     public User(String alias) {
-        this.alias = alias + "#" + Integer.toString((int) (Math.random() * 1000000));
+        id = (int) (Math.random() * 1000000);
+        this.alias = alias + "(#" + Integer.toString(id) + ")";
+    }
+    
+    public int getId() {
+        return id;
     }
     
     public String getAlias() {
         return alias;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 }

@@ -31,7 +31,7 @@ public class Main {
                 LoginFrm frm = new LoginFrm();
                         
                 ClientCtr client = new ClientCtr();
-                client.initGUI(frm);
+                client.setLoginFrame(frm);
                 frm.setActionListener(client);
                 frm.setVisible(true);
             }
