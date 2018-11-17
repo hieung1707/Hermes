@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package udp;
+package controller;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -20,47 +20,23 @@ import org.bytedeco.javacv.Java2DFrameUtils;
  *
  * @author ASUS
  */
-public class VideoClient {
+public class VideoClientGrabberThread extends Thread {
     private final String IP = "localhost";
     private final int PORT = 10000;
     
     private DatagramSocket socket;
     private FrameGrabber grabber;
     
-    public VideoClient() {
-        init();
-        
+    public VideoClientGrabberThread(DatagramSocket socket) {
+        init(socket);
     }
 
-    private void init() {
+    private void init(DatagramSocket socket) {
         try {
-            socket = new DatagramSocket();
-            grabber = FrameGrabber.createDefault(0);
+            this.socket = socket;
+            this.grabber = FrameGrabber.createDefault(0);
 
             // Frame to capture
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    //stream cam
-    public void streamCam() {
-        try {
-            grabber.start();
-            Frame frame = null;
-            VideoClientListenerThread videoListener = new VideoClientListenerThread(socket);
-            videoListener.start();
-            while ((frame = grabber.grab()) != null) {
-                //convert frame to byte array
-                BufferedImage img = Java2DFrameUtils.toBufferedImage(frame);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ImageIO.write(img, "jpg", baos);
-                baos.flush();
-                byte[] imageInBytes = baos.toByteArray();
-                baos.close();
-                sendBytes(imageInBytes);
-            }
-            grabber.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -83,8 +59,30 @@ public class VideoClient {
             e.printStackTrace();
         }
     }
+    
+    //stream cam
+    public void streamCam() {
+        try {
+            grabber.start();
+            Frame frame = null;
+            while ((frame = grabber.grab()) != null) {
+                //convert frame to byte array
+                BufferedImage img = Java2DFrameUtils.toBufferedImage(frame);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ImageIO.write(img, "jpg", baos);
+                baos.flush();
+                byte[] imageInBytes = baos.toByteArray();
+                baos.close();
+                sendBytes(imageInBytes);
+            }
+            grabber.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-    public static void main(String[] args) {
-        new VideoClient().streamCam();
+    @Override
+    public void run() {
+        streamCam();
     }
 }

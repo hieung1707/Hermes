@@ -25,7 +25,7 @@ public class ServerCtr {
     ServerSocket server;
     HashMap<String, ObjectOutputStream> mapOos;
     HashMap<User, String> mapUsers;
-    ArrayList<Room> listRooms;
+    HashMap<Integer, Room> listRooms;
     
     public ServerCtr() {
         initObjects();
@@ -35,7 +35,7 @@ public class ServerCtr {
     private void initObjects() {
         mapOos = new HashMap<>();
         mapUsers = new HashMap<>();
-        listRooms = new ArrayList<>();
+        listRooms = new HashMap<>();
     }
     
     private void initServer() {
@@ -45,7 +45,7 @@ public class ServerCtr {
                 Socket socket = server.accept();
                 System.out.println(socket.getInetAddress().getHostAddress() + "|" + socket.getPort());
                 mapOos.put(socket.getInetAddress().getHostAddress() + "|" + socket.getPort(), new ObjectOutputStream(socket.getOutputStream()));
-                ServerListenerThread thread = new ServerListenerThread(new ObjectInputStream(socket.getInputStream()), mapUsers, mapOos);
+                ServerListenerThread thread = new ServerListenerThread(new ObjectInputStream(socket.getInputStream()), mapUsers, mapOos, listRooms);
                 thread.start();
             }
         } catch (Exception e) {

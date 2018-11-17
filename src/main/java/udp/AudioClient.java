@@ -28,7 +28,7 @@ import javax.sound.sampled.TargetDataLine;
 public class AudioClient {
 
     private final int BUFFER_SIZE = 1024;
-    private final String IP = "192.168.1.35";
+    private final String IP = "localhost";
     private final int PORT = 501;
 
     boolean stopCapture = false;

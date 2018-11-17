@@ -19,12 +19,12 @@ import org.bytedeco.javacv.Java2DFrameUtils;
  *
  * @author ASUS
  */
-public class VideoListenerThread extends Thread {
+public class VideoClientListenerThread extends Thread {
     private final int BUFFER_SIZE = 1024;
     
     private DatagramSocket client;
 
-    public VideoListenerThread(DatagramSocket socket) {
+    public VideoClientListenerThread(DatagramSocket socket) {
         this.client = socket;
     }
 

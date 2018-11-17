@@ -18,11 +18,17 @@ public class Room implements Serializable {
     private String roomName;
     private ArrayList<User> members;
     private ArrayList<User> requests;
+    
+    public Room() {
+        
+    }
 
     public Room(String roomName, User roomMaster) {
         id = 1000000 + (int) (Math.random() * 1000000);
         this.roomName = roomName + "(#" + Integer.toString(id) + ")";
         this.roomMaster = roomMaster;
+        this.members = new ArrayList<>();
+        this.requests = new ArrayList<>();
     }
 
     public int getId() {
@@ -65,5 +71,7 @@ public class Room implements Serializable {
         this.requests = requests;
     }
     
-    
+    public void addMember(User member) {
+        this.members.add(member);
+    }
 }

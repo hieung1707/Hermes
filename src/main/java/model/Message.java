@@ -21,17 +21,19 @@ public class Message implements Serializable {
     public static final int SEND_MESSAGE_ROOM = 5;
     public static final int CREATE_ROOM = 6;
     public static final int SEND_REQUEST_ROOM = 7;
-    public static final int SEND_ACCEPT_ROOM = 8;
-    public static final int SEND_DECLINE_ROOM = 9;
-    public static final int SERVER_LOG_OUT = 10;
+    public static final int SEND_RESPONSE_ROOM = 8;
+    public static final int SERVER_LOG_OUT = 9;
+    public static final int FIND_ROOM = 10;
     
     private User sender;
     private String content;
     private User receiver;
-    private Room group;
+    private Room room;
     private int type;
     private int udpPort;
+    private boolean accept;
     private ArrayList<User> listUsers;
+    private ArrayList<Room> listRooms;
     
     public Message() {
         
@@ -47,7 +49,7 @@ public class Message implements Serializable {
     public Message(User sender, String content, Room group) {
         this.sender = sender;
         this.content = content;
-        this.group = group;
+        this.room = group;
         this.type = SEND_MESSAGE_ROOM;
     }
 
@@ -63,8 +65,8 @@ public class Message implements Serializable {
         return receiver;
     }
 
-    public Room getGroup() {
-        return group;
+    public Room getRoom() {
+        return room;
     }
 
     public int getType() {
@@ -95,8 +97,8 @@ public class Message implements Serializable {
         this.receiver = receiver;
     }
 
-    public void setGroup(Room group) {
-        this.group = group;
+    public void setRoom(Room group) {
+        this.room = group;
     }
 
     public void setType(int type) {
@@ -106,4 +108,21 @@ public class Message implements Serializable {
     public void setUdpPort(int udpPort) {
         this.udpPort = udpPort;
     }
+
+    public boolean isAccept() {
+        return accept;
+    }
+
+    public void setAccept(boolean accept) {
+        this.accept = accept;
+    }
+
+    public ArrayList<Room> getListRooms() {
+        return listRooms;
+    }
+
+    public void setListRooms(ArrayList<Room> listRooms) {
+        this.listRooms = listRooms;
+    }
+    
 }

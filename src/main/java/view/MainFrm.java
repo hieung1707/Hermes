@@ -6,9 +6,11 @@
 package view;
 
 import java.awt.event.ActionListener;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import javax.swing.DefaultListModel;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 /**
@@ -22,13 +24,27 @@ public class MainFrm extends javax.swing.JFrame {
     public MainFrm() {
         setResizable(false);
         initComponents();
-        updateList(listLobby, null);
-        updateList(listRecent, null);
-        updateList(listRooms, null);
+        updateList(0, null);
+        updateList(1, null);
+        updateList(2, null);
         setLocationRelativeTo(null);
+        txtChatLog.setEditable(false);
+        panelRight.setVisible(false);
     }
+   
     
-    public void updateList(javax.swing.JList<String> list, ArrayList<String> values) {
+    public void updateList(int tab, ArrayList<String> values) {
+        javax.swing.JList<String> list = null;
+        switch(tab) {
+            case 0:
+                list = listLobby;
+                break;
+            case 1:
+                list = listRooms;
+                break;
+        }
+        if (list == null)
+            return;
         DefaultListModel model = new DefaultListModel();
         list.setModel(model);
 //        model = (DefaultListModel) list.getModel();
@@ -40,31 +56,42 @@ public class MainFrm extends javax.swing.JFrame {
         }
     }
     
-    public javax.swing.JList getLobbyList() {
-        return listLobby;
-    }
-    
     public void setActionListeners(ActionListener listener) {
         topBtn1.addActionListener(listener);
         topBtn2.addActionListener(listener);
+        btnSend.addActionListener(listener);
+        btnCreateRoom.addActionListener(listener);
+        btnFindRoom.addActionListener(listener);
     }
     
     public void setMouseListeners(MouseListener listener) {
         listLobby.addMouseListener(listener);
-        listRecent.addMouseListener(listener);
         listRooms.addMouseListener(listener);
+    }
+    
+    public void setKeyListeners(KeyListener listener) {
+        txtSend.addKeyListener(listener);
+    }
+    
+    public void setRightPanelVisibility(boolean isVisible) {
+        panelRight.setVisible(isVisible);
     }
     
     public void setConversationName(String name) {
         lblName.setText(name);
     }
     
+    public void setContent(String msg) {
+        txtChatLog.setText(msg);
+    }
+    
     public void setDescription(String desc) {
         lblDesc.setText(desc);
     }
-    
-    public void setContent(String str) {
-        txtChatLog.setText(str);
+
+    public void setRoomRelatedButtonsVisibility(boolean isVisible) {
+        topBtn1.setVisible(isVisible);
+        topBtn2.setVisible(isVisible);
     }
     
     public int getSelectedTabbedPane() {
@@ -77,6 +104,16 @@ public class MainFrm extends javax.swing.JFrame {
     
     public JTextField getMessageBox() {
         return txtSend;
+    }
+    
+    public javax.swing.JList getList(int tab) {
+        switch(tab) {
+            case 0:
+                return listLobby;
+            case 1:
+                return listRooms;
+        }
+        return null;
     }
     
     public String getMessage() {
@@ -92,8 +129,6 @@ public class MainFrm extends javax.swing.JFrame {
             case 0:
                 return listLobby.getSelectedValue();
             case 1:
-                return listRecent.getSelectedValue();
-            case 2:
                 return listRooms.getSelectedValue();
         }
         return null;
@@ -116,18 +151,14 @@ public class MainFrm extends javax.swing.JFrame {
         jPanel6 = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
         listLobby = new javax.swing.JList<>();
-        jPanel5 = new javax.swing.JPanel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        listRecent = new javax.swing.JList<>();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         listRooms = new javax.swing.JList<>();
         btnCreateRoom = new javax.swing.JButton();
         btnFindRoom = new javax.swing.JButton();
-        panelLeft = new javax.swing.JPanel();
+        panelRight = new javax.swing.JPanel();
         lblName = new javax.swing.JLabel();
         lblDesc = new javax.swing.JLabel();
-        txtChatLog = new javax.swing.JTextField();
         topBtn1 = new javax.swing.JButton();
         topBtn2 = new javax.swing.JButton();
         txtSend = new javax.swing.JTextField();
@@ -135,6 +166,8 @@ public class MainFrm extends javax.swing.JFrame {
         btnVideo = new javax.swing.JButton();
         btnAudio = new javax.swing.JButton();
         btnSend = new javax.swing.JButton();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        txtChatLog = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
@@ -193,26 +226,6 @@ public class MainFrm extends javax.swing.JFrame {
 
         tpContacts.addTab("Lobby", jPanel6);
 
-        listRecent.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
-        jScrollPane2.setViewportView(listRecent);
-
-        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
-        jPanel5.setLayout(jPanel5Layout);
-        jPanel5Layout.setHorizontalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2)
-        );
-        jPanel5Layout.setVerticalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2)
-        );
-
-        tpContacts.addTab("Recent", jPanel5);
-
         listRooms.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
@@ -234,6 +247,7 @@ public class MainFrm extends javax.swing.JFrame {
         tpContacts.addTab("Rooms", jPanel2);
 
         btnCreateRoom.setText("Create Room");
+        btnCreateRoom.setActionCommand("create_room");
         btnCreateRoom.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCreateRoomActionPerformed(evt);
@@ -241,6 +255,7 @@ public class MainFrm extends javax.swing.JFrame {
         });
 
         btnFindRoom.setText("Find Room");
+        btnFindRoom.setActionCommand("find");
 
         javax.swing.GroupLayout leftPanelLayout = new javax.swing.GroupLayout(leftPanel);
         leftPanel.setLayout(leftPanelLayout);
@@ -270,26 +285,19 @@ public class MainFrm extends javax.swing.JFrame {
                 .addGroup(leftPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnFindRoom, javax.swing.GroupLayout.DEFAULT_SIZE, 36, Short.MAX_VALUE)
                     .addComponent(btnCreateRoom))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(31, Short.MAX_VALUE))
         );
 
         leftPanelLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {btnCreateRoom, btnFindRoom});
 
-        panelLeft.setBackground(new java.awt.Color(204, 204, 204));
+        panelRight.setBackground(new java.awt.Color(204, 204, 204));
 
         lblName.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         lblName.setText("Name");
 
         lblDesc.setText("text");
 
-        txtChatLog.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtChatLogActionPerformed(evt);
-            }
-        });
-
         topBtn1.setText("Leave Room");
-        topBtn1.setActionCommand("send");
         topBtn1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 topBtn1ActionPerformed(evt);
@@ -297,6 +305,7 @@ public class MainFrm extends javax.swing.JFrame {
         });
 
         topBtn2.setText("Manage Room");
+        topBtn2.setActionCommand("manage");
         topBtn2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 topBtn2ActionPerformed(evt);
@@ -310,72 +319,81 @@ public class MainFrm extends javax.swing.JFrame {
         btnAudio.setText("Audio");
 
         btnSend.setText("Send");
+        btnSend.setActionCommand("send");
         btnSend.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSendActionPerformed(evt);
             }
         });
 
-        javax.swing.GroupLayout panelLeftLayout = new javax.swing.GroupLayout(panelLeft);
-        panelLeft.setLayout(panelLeftLayout);
-        panelLeftLayout.setHorizontalGroup(
-            panelLeftLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelLeftLayout.createSequentialGroup()
+        txtChatLog.setColumns(20);
+        txtChatLog.setRows(5);
+        jScrollPane4.setViewportView(txtChatLog);
+
+        javax.swing.GroupLayout panelRightLayout = new javax.swing.GroupLayout(panelRight);
+        panelRight.setLayout(panelRightLayout);
+        panelRightLayout.setHorizontalGroup(
+            panelRightLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelRightLayout.createSequentialGroup()
                 .addGap(12, 12, 12)
-                .addGroup(panelLeftLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtChatLog)
-                    .addGroup(panelLeftLayout.createSequentialGroup()
-                        .addGroup(panelLeftLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(panelLeftLayout.createSequentialGroup()
+                .addGroup(panelRightLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(panelRightLayout.createSequentialGroup()
+                        .addGroup(panelRightLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(panelRightLayout.createSequentialGroup()
                                 .addComponent(lblName)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(topBtn2, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
                                 .addComponent(topBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(panelLeftLayout.createSequentialGroup()
-                                .addComponent(lblDesc)
-                                .addGap(506, 506, 506)
-                                .addComponent(topBtn2, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 7, Short.MAX_VALUE))
-                    .addGroup(panelLeftLayout.createSequentialGroup()
-                        .addGroup(panelLeftLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(panelLeftLayout.createSequentialGroup()
-                                .addComponent(btnFile)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnVideo)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnAudio)
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(txtSend))
-                        .addGap(18, 18, 18)
-                        .addComponent(btnSend, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(12, 12, 12))
+                            .addGroup(panelRightLayout.createSequentialGroup()
+                                .addGroup(panelRightLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(panelRightLayout.createSequentialGroup()
+                                        .addComponent(btnFile)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(btnVideo)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(btnAudio)
+                                        .addGap(0, 363, Short.MAX_VALUE))
+                                    .addComponent(txtSend))
+                                .addGap(18, 18, 18)
+                                .addComponent(btnSend, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(12, 12, 12))
+                    .addGroup(panelRightLayout.createSequentialGroup()
+                        .addComponent(lblDesc)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(panelRightLayout.createSequentialGroup()
+                        .addComponent(jScrollPane4)
+                        .addContainerGap())))
         );
 
-        panelLeftLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnAudio, btnFile, btnVideo});
+        panelRightLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnAudio, btnFile, btnVideo});
 
-        panelLeftLayout.setVerticalGroup(
-            panelLeftLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelLeftLayout.createSequentialGroup()
+        panelRightLayout.setVerticalGroup(
+            panelRightLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelRightLayout.createSequentialGroup()
                 .addGap(7, 7, 7)
-                .addGroup(panelLeftLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblName)
-                    .addComponent(topBtn1))
-                .addGap(8, 8, 8)
-                .addGroup(panelLeftLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblDesc)
-                    .addComponent(topBtn2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtChatLog, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(9, 9, 9)
-                .addGroup(panelLeftLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelLeftLayout.createSequentialGroup()
-                        .addGroup(panelLeftLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(panelRightLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, panelRightLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(topBtn1)
+                        .addComponent(topBtn2))
+                    .addGroup(panelRightLayout.createSequentialGroup()
+                        .addComponent(lblName)
+                        .addGap(21, 21, 21)
+                        .addComponent(lblDesc)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, 15, Short.MAX_VALUE)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 301, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(3, 3, 3)
+                .addGroup(panelRightLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelRightLayout.createSequentialGroup()
+                        .addGroup(panelRightLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(btnFile)
                             .addComponent(btnVideo)
                             .addComponent(btnAudio))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(txtSend, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtSend, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(btnSend, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(30, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -386,8 +404,8 @@ public class MainFrm extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(leftPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(panelLeft, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(24, 24, 24))
+                .addComponent(panelRight, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(12, 12, 12))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -395,8 +413,8 @@ public class MainFrm extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(leftPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(panelLeft, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(30, 30, 30))
+                    .addComponent(panelRight, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(12, 12, 12))
         );
 
         pack();
@@ -405,10 +423,6 @@ public class MainFrm extends javax.swing.JFrame {
     private void btnCreateRoomActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateRoomActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_btnCreateRoomActionPerformed
-
-    private void txtChatLogActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtChatLogActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtChatLogActionPerformed
 
     private void topBtn1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_topBtn1ActionPerformed
         // TODO add your handling code here:
@@ -448,23 +462,21 @@ public class MainFrm extends javax.swing.JFrame {
     private javax.swing.JButton btnVideo;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JLabel lblDesc;
     private javax.swing.JLabel lblName;
     private javax.swing.JLabel lblWelcome;
     private javax.swing.JPanel leftPanel;
     private javax.swing.JList<String> listLobby;
-    private javax.swing.JList<String> listRecent;
     private javax.swing.JList<String> listRooms;
-    private javax.swing.JPanel panelLeft;
+    private javax.swing.JPanel panelRight;
     private javax.swing.JButton topBtn1;
     private javax.swing.JButton topBtn2;
     private javax.swing.JTabbedPane tpContacts;
-    private javax.swing.JTextField txtChatLog;
+    private javax.swing.JTextArea txtChatLog;
     private javax.swing.JTextField txtSend;
     // End of variables declaration//GEN-END:variables
 }
