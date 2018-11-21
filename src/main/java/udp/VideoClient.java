@@ -35,6 +35,7 @@ public class VideoClient {
     private void init() {
         try {
             socket = new DatagramSocket();
+            System.out.println(socket.getLocalPort());
             grabber = FrameGrabber.createDefault(0);
 
             // Frame to capture

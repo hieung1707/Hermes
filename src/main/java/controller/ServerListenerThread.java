@@ -7,8 +7,10 @@ package controller;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
+import javafx.util.Pair;
 import model.Message;
 import model.Room;
 import model.User;
@@ -24,12 +26,16 @@ public class ServerListenerThread extends Thread {
     private HashMap<User, String> mapUsers;
     private HashMap<String, ObjectOutputStream> mapOos;
     private HashMap<Integer, Room> mapRooms;
+    private VideoServerCtr videoServer;
+    private AudioServerCtr audioServer;
 
-    public ServerListenerThread(ObjectInputStream ois, HashMap<User, String> mapUsers, HashMap<String, ObjectOutputStream> listOos, HashMap<Integer, Room> listRooms) {
+    public ServerListenerThread(ObjectInputStream ois, HashMap<User, String> mapUsers, HashMap<String, ObjectOutputStream> listOos, HashMap<Integer, Room> listRooms, VideoServerCtr videoServer, AudioServerCtr audioServer) {
         this.ois = ois;
         this.mapOos = listOos;
         this.mapUsers = mapUsers;
         this.mapRooms = listRooms;
+        this.videoServer = videoServer;
+        this.audioServer = audioServer;
     }
 
     @Override
@@ -47,13 +53,11 @@ public class ServerListenerThread extends Thread {
                             sendMsgToUser(msg);
                             break;
                         case Message.SEND_REQUEST_USER:
-
+                            System.out.println("REQUEST " + msg.getVideoAddressSender().getValue());
+                            sendMsgToUser(msg);
                             break;
-                        case Message.SEND_ACCEPT_USER:
-
-                            break;
-                        case Message.SEND_DECLINE_USER:
-
+                        case Message.SEND_RESPONSE_USER:
+                            setStreamConnections(msg);
                             break;
                         case Message.SEND_MESSAGE_ROOM:
                             sendToAllMembers(msg);
@@ -65,13 +69,17 @@ public class ServerListenerThread extends Thread {
                             sendRequestToKey(msg);
                             break;
                         case Message.SEND_RESPONSE_ROOM:
-                            sendResponse(msg);
+                            sendRoomResponse(msg);
                             break;
                         case Message.SERVER_LOG_OUT:
                             logout(msg);
                             break;
                         case Message.FIND_ROOM:
                             sendRoomList(msg);
+                            break;
+                        case Message.CLOSE_STREAM:
+                            System.out.println("CLOSE STREAM");
+                            closeStream(msg);
                             break;
                     }
                 }
@@ -83,7 +91,6 @@ public class ServerListenerThread extends Thread {
 
     private void addUser(Message msg) {
         try {
-            System.out.println(msg.getSender().getAlias() + " " + msg.getSender().getIp() + "|" + msg.getSender().getPort());
             mapUsers.put(msg.getSender(), msg.getSender().getIp() + "|" + msg.getSender().getPort());
             ArrayList<User> listUsers = new ArrayList<>(mapUsers.keySet());
             msg.setUserList(listUsers);
@@ -99,8 +106,12 @@ public class ServerListenerThread extends Thread {
     private void sendMsgToUser(Message msg) {
         try {
             String identity = msg.getReceiver().getIp() + "|" + msg.getReceiver().getPort();
-            mapOos.get(mapUsers.get(msg.getSender())).writeObject(msg);
-            mapOos.get(identity).writeObject(msg);
+            if (msg.getType() == Message.SEND_MESSAGE_USER) {
+                mapOos.get(mapUsers.get(msg.getSender())).writeObject(msg);
+            }
+            ObjectOutputStream oos = mapOos.get(identity);
+            oos.writeObject(msg);
+            oos.flush();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -113,6 +124,20 @@ public class ServerListenerThread extends Thread {
             mapUsers.remove(user);
             ArrayList<User> listUsers = new ArrayList<>(mapUsers.keySet());
             msg.setUserList(listUsers);
+            Room r = null;
+            for (int id : mapRooms.keySet()) {
+                r = mapRooms.get(id);
+                ArrayList<User> members = r.getMembers();
+                if (r.getRoomMaster().getAlias().equals(user.getAlias())) {
+                    mapRooms.remove(r.getId());
+                }
+                for (User member : members) {
+                    if (member.getAlias().equals(user.getAlias())) {
+                        members.remove(member);
+                        break;
+                    }
+                }
+            }
             for (String key : mapOos.keySet()) {
                 ObjectOutputStream oos = mapOos.get(key);
                 oos.writeObject(msg);
@@ -176,14 +201,13 @@ public class ServerListenerThread extends Thread {
             e.printStackTrace();
         }
     }
-    
-    private void sendResponse(Message msg) {
+
+    private void sendRoomResponse(Message msg) {
         try {
             if (!msg.isAccept()) {
                 String identity = msg.getReceiver().getIp() + "|" + msg.getReceiver().getPort();
                 mapOos.get(identity).writeObject(msg);
-            }
-            else {
+            } else {
                 Room r = mapRooms.get(msg.getRoom().getId());
                 r.addMember(msg.getReceiver());
                 mapRooms.put(r.getId(), r);
@@ -194,17 +218,30 @@ public class ServerListenerThread extends Thread {
             e.printStackTrace();
         }
     }
-    
+
     private void sendToAllMembers(Message msg) {
         try {
             ArrayList<User> members = mapRooms.get(msg.getRoom().getId()).getMembers();
             for (User u : members) {
                 String identity = u.getIp() + "|" + u.getPort();
-                System.out.println(identity);
                 mapOos.get(identity).writeObject(msg);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void setStreamConnections(Message msg) {
+        if (msg.isAccept()) {
+            videoServer.addMap(msg.getVideoAddressSender(), msg.getVideoAddressReceiver());
+            audioServer.addMap(msg.getAddressAudioSender(), msg.getAddressAudioReceiver());
+        }
+        sendMsgToUser(msg);
+    }
+    
+    private void closeStream(Message msg) {
+        videoServer.removeMaps(msg.getVideoAddressSender());
+        audioServer.removeMaps(msg.getAddressAudioSender());
+        sendMsgToUser(msg);
     }
 }

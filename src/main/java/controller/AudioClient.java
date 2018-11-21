@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package udp;
+package controller;
 
+import udp.*;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -119,6 +120,8 @@ public class AudioClient {
 
                     sendBytes(tempBuffer);
                 }
+                targetDataLine.drain();
+                targetDataLine.close();
             } catch (Exception e) {
                 e.printStackTrace();
                 System.exit(0);
@@ -180,6 +183,7 @@ public class AudioClient {
                 byte[] buffer = new byte[BUFFER_SIZE];
                 DatagramPacket rcvPacket = new DatagramPacket(buffer, buffer.length);
                 socket.receive(rcvPacket);
+                System.out.println(rcvPacket.getPort());
                 return rcvPacket.getData();
             } catch (Exception e) {
                 e.printStackTrace();

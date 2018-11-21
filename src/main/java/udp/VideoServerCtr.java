@@ -44,6 +44,7 @@ public class VideoServerCtr {
                 DatagramPacket rcvPacket = new DatagramPacket(receivedData, receivedData.length);
                 videoServer.receive(rcvPacket);
                 //send back to the sender, modify this part to send to other receivers
+                System.out.println(rcvPacket.getPort());
                 DatagramPacket sendPacket = new DatagramPacket(rcvPacket.getData(), rcvPacket.getLength(), rcvPacket.getAddress(), rcvPacket.getPort());
                 videoServer.send(sendPacket);
             }

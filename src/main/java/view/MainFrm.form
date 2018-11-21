@@ -284,7 +284,7 @@
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="102" attributes="0">
                                   <Component id="lblName" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace max="32767" attributes="0"/>
+                                  <EmptySpace pref="356" max="32767" attributes="0"/>
                                   <Component id="topBtn2" min="-2" pref="131" max="-2" attributes="0"/>
                                   <EmptySpace type="separate" max="-2" attributes="0"/>
                                   <Component id="topBtn1" min="-2" pref="131" max="-2" attributes="0"/>
@@ -292,12 +292,8 @@
                               <Group type="102" alignment="0" attributes="0">
                                   <Group type="103" groupAlignment="0" attributes="0">
                                       <Group type="102" attributes="0">
-                                          <Component id="btnFile" linkSize="6" min="-2" max="-2" attributes="0"/>
-                                          <EmptySpace max="-2" attributes="0"/>
-                                          <Component id="btnVideo" linkSize="6" min="-2" max="-2" attributes="0"/>
-                                          <EmptySpace max="-2" attributes="0"/>
-                                          <Component id="btnAudio" linkSize="6" min="-2" max="-2" attributes="0"/>
-                                          <EmptySpace min="0" pref="363" max="32767" attributes="0"/>
+                                          <Component id="btnVideo" min="-2" max="-2" attributes="0"/>
+                                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                                       </Group>
                                       <Component id="txtSend" max="32767" attributes="0"/>
                                   </Group>
@@ -339,11 +335,7 @@
                   <EmptySpace min="-2" pref="3" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="1" attributes="0">
-                          <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="btnFile" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="btnVideo" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="btnAudio" alignment="3" min="-2" max="-2" attributes="0"/>
-                          </Group>
+                          <Component id="btnVideo" min="-2" max="-2" attributes="0"/>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Component id="txtSend" min="-2" pref="39" max="-2" attributes="0"/>
                           <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
@@ -390,20 +382,16 @@
         </Component>
         <Component class="javax.swing.JTextField" name="txtSend">
         </Component>
-        <Component class="javax.swing.JButton" name="btnFile">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="File"/>
-          </Properties>
-        </Component>
         <Component class="javax.swing.JButton" name="btnVideo">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Video"/>
+            <Property name="text" type="java.lang.String" value="Stream"/>
           </Properties>
-        </Component>
-        <Component class="javax.swing.JButton" name="btnAudio">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Audio"/>
-          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnVideoActionPerformed"/>
+          </Events>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="btnVideo.setActionCommand(&quot;request_stream&quot;);"/>
+          </AuxValues>
         </Component>
         <Component class="javax.swing.JButton" name="btnSend">
           <Properties>

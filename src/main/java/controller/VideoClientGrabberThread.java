@@ -10,8 +10,10 @@ import java.io.ByteArrayOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.util.Arrays;
 import javax.imageio.ImageIO;
+import javax.swing.JOptionPane;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.Java2DFrameUtils;
@@ -26,6 +28,7 @@ public class VideoClientGrabberThread extends Thread {
     
     private DatagramSocket socket;
     private FrameGrabber grabber;
+    private boolean running;
     
     public VideoClientGrabberThread(DatagramSocket socket) {
         init(socket);
@@ -34,6 +37,7 @@ public class VideoClientGrabberThread extends Thread {
     private void init(DatagramSocket socket) {
         try {
             this.socket = socket;
+            System.out.println(socket.getLocalAddress().getHostAddress() + " " + socket.getLocalPort());
             this.grabber = FrameGrabber.createDefault(0);
 
             // Frame to capture
@@ -65,8 +69,12 @@ public class VideoClientGrabberThread extends Thread {
         try {
             grabber.start();
             Frame frame = null;
-            while ((frame = grabber.grab()) != null) {
+            running = true;
+            while (running) {
                 //convert frame to byte array
+                frame = grabber.grab();
+                if (frame == null)
+                    continue;
                 BufferedImage img = Java2DFrameUtils.toBufferedImage(frame);
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ImageIO.write(img, "jpg", baos);
@@ -77,12 +85,18 @@ public class VideoClientGrabberThread extends Thread {
             }
             grabber.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Your camera is being used by another user");
+            closeVideo();
         }
     }
 
     @Override
     public void run() {
         streamCam();
+    }
+
+    
+    public void closeVideo() {
+        running = false;
     }
 }

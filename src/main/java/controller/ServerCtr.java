@@ -9,10 +9,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.HashMap;
 import model.Room;
-import model.Message;
 import model.User;
 
 /**
@@ -23,6 +21,7 @@ public class ServerCtr {
     private final int PORT = 2500;
     
     ServerSocket server;
+//    DatagramSocket udpSocket;
     HashMap<String, ObjectOutputStream> mapOos;
     HashMap<User, String> mapUsers;
     HashMap<Integer, Room> listRooms;
@@ -38,14 +37,17 @@ public class ServerCtr {
         listRooms = new HashMap<>();
     }
     
+    
     private void initServer() {
         try {
+//            udpSocket = new DatagramSocket(PORT);
+            VideoServerCtr videoCtr = new VideoServerCtr();
+            AudioServerCtr audioCtr = new AudioServerCtr();
             server = new ServerSocket(PORT);
             while (true) {
                 Socket socket = server.accept();
-                System.out.println(socket.getInetAddress().getHostAddress() + "|" + socket.getPort());
                 mapOos.put(socket.getInetAddress().getHostAddress() + "|" + socket.getPort(), new ObjectOutputStream(socket.getOutputStream()));
-                ServerListenerThread thread = new ServerListenerThread(new ObjectInputStream(socket.getInputStream()), mapUsers, mapOos, listRooms);
+                ServerListenerThread thread = new ServerListenerThread(new ObjectInputStream(socket.getInputStream()), mapUsers, mapOos, listRooms, videoCtr, audioCtr);
                 thread.start();
             }
         } catch (Exception e) {

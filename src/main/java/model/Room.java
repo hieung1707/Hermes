@@ -17,7 +17,6 @@ public class Room implements Serializable {
     private User roomMaster;
     private String roomName;
     private ArrayList<User> members;
-    private ArrayList<User> requests;
     
     public Room() {
         
@@ -28,7 +27,6 @@ public class Room implements Serializable {
         this.roomName = roomName + "(#" + Integer.toString(id) + ")";
         this.roomMaster = roomMaster;
         this.members = new ArrayList<>();
-        this.requests = new ArrayList<>();
     }
 
     public int getId() {
@@ -47,10 +45,6 @@ public class Room implements Serializable {
         return members;
     }
 
-    public ArrayList<User> getRequests() {
-        return requests;
-    }
-
     public void setId(int id) {
         this.id = id;
     }
@@ -65,10 +59,6 @@ public class Room implements Serializable {
 
     public void setMembers(ArrayList<User> members) {
         this.members = members;
-    }
-
-    public void setRequests(ArrayList<User> requests) {
-        this.requests = requests;
     }
     
     public void addMember(User member) {

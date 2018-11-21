@@ -43,7 +43,15 @@ public class User implements Serializable {
         this.ip = ip;
     }
 
-    public void setPort(int port) {
+    public void setPort(Integer port) {
         this.port = port;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 }

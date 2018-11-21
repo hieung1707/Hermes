@@ -6,37 +6,45 @@
 package model;
 
 import java.io.Serializable;
+import java.net.InetAddress;
 import java.util.ArrayList;
+import javafx.util.Pair;
 
 /**
  *
  * @author ASUS
  */
 public class Message implements Serializable {
+
     public static final int SERVER_REGISTRATION = 0;
-    public static final int SEND_MESSAGE_USER = 1;    
+    public static final int SEND_MESSAGE_USER = 1;
     public static final int SEND_REQUEST_USER = 2;
-    public static final int SEND_ACCEPT_USER = 3;
-    public static final int SEND_DECLINE_USER = 4;
+    public static final int SEND_RESPONSE_USER = 3;
+    public static final int FIND_ROOM = 4;
     public static final int SEND_MESSAGE_ROOM = 5;
     public static final int CREATE_ROOM = 6;
     public static final int SEND_REQUEST_ROOM = 7;
     public static final int SEND_RESPONSE_ROOM = 8;
     public static final int SERVER_LOG_OUT = 9;
-    public static final int FIND_ROOM = 10;
-    
+    public static final int CLOSE_STREAM = 10;
+
     private User sender;
     private String content;
     private User receiver;
     private Room room;
     private int type;
-    private int udpPort;
     private boolean accept;
     private ArrayList<User> listUsers;
     private ArrayList<Room> listRooms;
-    
+    private Pair<String, Integer> addressVideoSender;
+    private Pair<String, Integer> addressVideoReceiver;
+    private Pair<String, Integer> addressAudioSender;
+    private Pair<String, Integer> addressAudioReceiver;
+
+//    private 
+
     public Message() {
-        
+
     }
 
     public Message(User sender, String content, User receiver) {
@@ -73,14 +81,10 @@ public class Message implements Serializable {
         return type;
     }
 
-    public int getUdpPort() {
-        return udpPort;
-    }
-    
     public ArrayList<User> getUserList() {
         return listUsers;
     }
-    
+
     public void setUserList(ArrayList<User> listUsers) {
         this.listUsers = listUsers;
     }
@@ -105,10 +109,6 @@ public class Message implements Serializable {
         this.type = type;
     }
 
-    public void setUdpPort(int udpPort) {
-        this.udpPort = udpPort;
-    }
-
     public boolean isAccept() {
         return accept;
     }
@@ -124,5 +124,38 @@ public class Message implements Serializable {
     public void setListRooms(ArrayList<Room> listRooms) {
         this.listRooms = listRooms;
     }
+
+    public Pair<String, Integer> getVideoAddressSender() {
+        return addressVideoSender;
+    }
+
+    public void setVideoAddressSender(Pair<String, Integer> add1) {
+        this.addressVideoSender = add1;
+    }
+
+    public Pair<String, Integer> getVideoAddressReceiver() {
+        return addressVideoReceiver;
+    }
+
+    public void setVideoAddressReceiver(Pair<String, Integer> add2) {
+        this.addressVideoReceiver = add2;
+    }
+
+    public Pair<String, Integer> getAddressAudioSender() {
+        return addressAudioSender;
+    }
+
+    public Pair<String, Integer> getAddressAudioReceiver() {
+        return addressAudioReceiver;
+    }
+
+    public void setAddressAudioSender(Pair<String, Integer> addressAudioSender) {
+        this.addressAudioSender = addressAudioSender;
+    }
+
+    public void setAddressAudioReceiver(Pair<String, Integer> addressAudioReceiver) {
+        this.addressAudioReceiver = addressAudioReceiver;
+    }
+    
     
 }

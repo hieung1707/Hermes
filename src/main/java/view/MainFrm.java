@@ -62,6 +62,7 @@ public class MainFrm extends javax.swing.JFrame {
         btnSend.addActionListener(listener);
         btnCreateRoom.addActionListener(listener);
         btnFindRoom.addActionListener(listener);
+        btnVideo.addActionListener(listener);
     }
     
     public void setMouseListeners(MouseListener listener) {
@@ -162,9 +163,7 @@ public class MainFrm extends javax.swing.JFrame {
         topBtn1 = new javax.swing.JButton();
         topBtn2 = new javax.swing.JButton();
         txtSend = new javax.swing.JTextField();
-        btnFile = new javax.swing.JButton();
         btnVideo = new javax.swing.JButton();
-        btnAudio = new javax.swing.JButton();
         btnSend = new javax.swing.JButton();
         jScrollPane4 = new javax.swing.JScrollPane();
         txtChatLog = new javax.swing.JTextArea();
@@ -312,11 +311,13 @@ public class MainFrm extends javax.swing.JFrame {
             }
         });
 
-        btnFile.setText("File");
-
-        btnVideo.setText("Video");
-
-        btnAudio.setText("Audio");
+        btnVideo.setText("Stream");
+        btnVideo.setActionCommand("request_stream");
+        btnVideo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnVideoActionPerformed(evt);
+            }
+        });
 
         btnSend.setText("Send");
         btnSend.setActionCommand("send");
@@ -341,19 +342,15 @@ public class MainFrm extends javax.swing.JFrame {
                         .addGroup(panelRightLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(panelRightLayout.createSequentialGroup()
                                 .addComponent(lblName)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 356, Short.MAX_VALUE)
                                 .addComponent(topBtn2, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
                                 .addComponent(topBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(panelRightLayout.createSequentialGroup()
                                 .addGroup(panelRightLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(panelRightLayout.createSequentialGroup()
-                                        .addComponent(btnFile)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(btnVideo)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(btnAudio)
-                                        .addGap(0, 363, Short.MAX_VALUE))
+                                        .addGap(0, 0, Short.MAX_VALUE))
                                     .addComponent(txtSend))
                                 .addGap(18, 18, 18)
                                 .addComponent(btnSend, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -365,9 +362,6 @@ public class MainFrm extends javax.swing.JFrame {
                         .addComponent(jScrollPane4)
                         .addContainerGap())))
         );
-
-        panelRightLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnAudio, btnFile, btnVideo});
-
         panelRightLayout.setVerticalGroup(
             panelRightLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelRightLayout.createSequentialGroup()
@@ -385,10 +379,7 @@ public class MainFrm extends javax.swing.JFrame {
                 .addGap(3, 3, 3)
                 .addGroup(panelRightLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelRightLayout.createSequentialGroup()
-                        .addGroup(panelRightLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(btnFile)
-                            .addComponent(btnVideo)
-                            .addComponent(btnAudio))
+                        .addComponent(btnVideo)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(txtSend, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
@@ -440,6 +431,10 @@ public class MainFrm extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_btnLogoutActionPerformed
 
+    private void btnVideoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVideoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnVideoActionPerformed
+
     public void setAlias(String alias) {
         lblWelcome.setText("Welcome, "+ alias);
     }
@@ -453,9 +448,7 @@ public class MainFrm extends javax.swing.JFrame {
      */
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnAudio;
     private javax.swing.JButton btnCreateRoom;
-    private javax.swing.JButton btnFile;
     private javax.swing.JButton btnFindRoom;
     private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnSend;

@@ -5,7 +5,6 @@
  */
 package controller;
 
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -16,15 +15,15 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
+import javafx.util.Pair;
 import javax.swing.JOptionPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
 import model.Room;
 import model.Message;
 import model.User;
@@ -32,6 +31,7 @@ import view.LoginFrm;
 import view.MainFrm;
 import view.ManageRoomFrm;
 import view.MessageFrm;
+import view.StreamFrm;
 
 /**
  *
@@ -52,12 +52,20 @@ public class ClientCtr implements ActionListener, MouseListener, KeyListener {
     private ObjectInputStream ois;
     private ObjectOutputStream oos;
     private String targetType = "";
-    private boolean running = false;
+    private DatagramSocket videoSocket;
+    private DatagramSocket audioSocket;
+    private User userStream; // user currently stream with
+
+    //threads
+    private VideoClientGrabberThread videoGrabber;
+    private VideoClientListenerThread videoListener;
+    private AudioClient audioClient;
 
     //GUI objects
     private LoginFrm frmLogin;
     private MainFrm frmMain;
     private ManageRoomFrm frmFind;
+    private StreamFrm frmStream;
 
     public ClientCtr() {
     }
@@ -131,10 +139,8 @@ public class ClientCtr implements ActionListener, MouseListener, KeyListener {
 
     private void sendMessageToServer(Message msg) {
         try {
-            if (msg.getType() == Message.SEND_MESSAGE_USER) {
-                System.out.println(msg.getReceiver().getAlias());
-            }
             oos.writeObject(msg);
+            oos.flush();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -165,6 +171,7 @@ public class ClientCtr implements ActionListener, MouseListener, KeyListener {
         targetType = "room";
         frmMain.setConversationName(roomName);
         frmMain.setDescription(IP);
+        frmMain.setRoomRelatedButtonsVisibility(false);
         for (Room r : listRooms) {
             if (r.getRoomName().equals(roomName)) {
                 String log = "";
@@ -209,7 +216,7 @@ public class ClientCtr implements ActionListener, MouseListener, KeyListener {
             JOptionPane.showMessageDialog(frmMain, "This user has gone offline");
             return;
         } else if (targetType.equals("room") && room == null) {
-            JOptionPane.showConfirmDialog(frmMain, "Room has been disbanded");
+            JOptionPane.showMessageDialog(frmMain, "Room has been disbanded");
             return;
         }
 
@@ -228,6 +235,9 @@ public class ClientCtr implements ActionListener, MouseListener, KeyListener {
 
     private void createRoom() {
         String roomName = JOptionPane.showInputDialog(frmMain, "Please insert your room name");
+        if (roomName == null) {
+            return;
+        }
         Room room = new Room(roomName, user);
         room.addMember(user);
         Message message = new Message();
@@ -268,20 +278,47 @@ public class ClientCtr implements ActionListener, MouseListener, KeyListener {
     }
 
     private void requestEnter() {
+        String name = frmFind.getSelectedRoom();
+        if (name == null) {
+            return;
+        }
+        Room room = new Room();
+        room.setRoomName(name);
+        Message msg = new Message();
+        msg.setSender(user);
+        msg.setRoom(room);
+        msg.setType(Message.SEND_REQUEST_ROOM);
+        sendMessageToServer(msg);
+        frmFind.dispose();
+        frmFind = null;
+
+    }
+
+    private void requestStream() {
         try {
-            String name = frmFind.getSelectedValue();
-            if (name == null) {
+            User receiver = null;
+            if (!targetType.equals("user")) {
+                JOptionPane.showMessageDialog(frmMain, "This version doesn't support groupp streaming yet");
                 return;
             }
-            Room room = new Room();
-            room.setRoomName(name);
+            for (User u : listLobby) {
+                if (u.getAlias().equals(frmMain.getCurrentReceiver())) {
+                    receiver = u;
+                }
+            }
+            if (receiver == null) {
+                JOptionPane.showMessageDialog(frmMain, "This user has gone offline");
+                return;
+            }
             Message msg = new Message();
+            videoSocket = new DatagramSocket();
+            audioSocket = new DatagramSocket();
             msg.setSender(user);
-            msg.setRoom(room);
-            msg.setType(Message.SEND_REQUEST_ROOM);
+            msg.setReceiver(receiver);
+            msg.setType(Message.SEND_REQUEST_USER);
+            msg.setVideoAddressSender(new Pair<>(InetAddress.getLocalHost().getHostAddress(), videoSocket.getLocalPort()));
+            msg.setAddressAudioSender(new Pair<>(InetAddress.getLocalHost().getHostAddress(), audioSocket.getLocalPort()));
             sendMessageToServer(msg);
-            frmFind.dispose();
-            frmFind = null;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -327,6 +364,9 @@ public class ClientCtr implements ActionListener, MouseListener, KeyListener {
                 break;
             case "request":
                 requestEnter();
+                break;
+            case "request_stream":
+                requestStream();
                 break;
         }
     }
@@ -395,11 +435,11 @@ public class ClientCtr implements ActionListener, MouseListener, KeyListener {
                     switch (msg.getType()) {
                         case Message.SERVER_REGISTRATION:
                             System.out.println("MORE USERS");
-                            updateLobbyList(msg.getUserList());
+                            updateRoomsAndLobby(msg);
                             break;
                         case Message.SERVER_LOG_OUT:
                             System.out.print("SOMEONE LOGOUT!");
-                            updateLobbyList(msg.getUserList());
+                            updateRoomsAndLobby(msg);
                             break;
                         case Message.SEND_MESSAGE_USER:
                             System.out.println("MSG FROM USER");
@@ -417,15 +457,20 @@ public class ClientCtr implements ActionListener, MouseListener, KeyListener {
                             responseRequest(msg);
                             break;
                         case Message.SEND_RESPONSE_ROOM:
-                            if (msg.isAccept()) {
-                                JOptionPane.showMessageDialog(frmMain, "Your request has been accepted");
-                                updateListRoom(msg.getListRooms());
-                            } else {
-                                JOptionPane.showMessageDialog(frmMain, "sorry your request has been denied");
-                            }
+                            handleResponseRoom(msg);
                             break;
                         case Message.SEND_MESSAGE_ROOM:
                             appendMessageRoom(msg);
+                            break;
+                        case Message.SEND_REQUEST_USER:
+                            responseStreamRequest(msg);
+                            break;
+                        case Message.SEND_RESPONSE_USER:
+                            handleResponseStream(msg);
+                            break;
+                        case Message.CLOSE_STREAM:
+                            System.out.println("CLOSE STREAM");
+                            endStream(msg);
                             break;
                     }
                 }
@@ -434,8 +479,17 @@ public class ClientCtr implements ActionListener, MouseListener, KeyListener {
             }
         }
 
-        private void updateLobbyList(ArrayList<User> listUsers) {
-            listLobby = listUsers;
+        private void updateRoomsAndLobby(Message msg) {
+            ArrayList<Room> removedRooms = new ArrayList<>();
+            for (Room r : listRooms) {
+                if (r.getRoomMaster().getAlias().equals(msg.getSender().getAlias())) {
+                    JOptionPane.showMessageDialog(frmMain, "Room " + r.getRoomName() + " has been disbanded due to room master logging out");
+                    removedRooms.add(r);
+                }
+            }
+            listRooms.removeAll(removedRooms);
+            updateListRoom(listRooms);
+            listLobby = msg.getUserList();
             frmMain.updateList(0, convertUserToString(listLobby));
         }
 
@@ -476,7 +530,7 @@ public class ClientCtr implements ActionListener, MouseListener, KeyListener {
             }
 
         }
-        
+
         private void appendMessageRoom(Message msg) {
             String senderAlias = msg.getSender().getAlias() + ":";
             String strMsg = msg.getContent();
@@ -487,8 +541,7 @@ public class ClientCtr implements ActionListener, MouseListener, KeyListener {
             mapChatLogs.put(msg.getRoom().getId(), log);
             if (frmMain.getCurrentReceiver().equals(msg.getRoom().getRoomName())) {
                 frmMain.setContent(log);
-            }
-            else {
+            } else {
                 MessageFrm frmMsg = new MessageFrm(msg.getRoom().getRoomName(), strMsg);
                 frmMsg.setActionListeners(new ActionListener() {
                     @Override
@@ -502,12 +555,121 @@ public class ClientCtr implements ActionListener, MouseListener, KeyListener {
         }
 
         private void responseRequest(Message msg) {
-            int showConfirmDialog = JOptionPane.showConfirmDialog(frmMain, "Do you want to let " + msg.getSender().getAlias() + " join the room?");
-            msg.setReceiver(msg.getSender());
-            msg.setSender(user);
-            msg.setType(Message.SEND_RESPONSE_ROOM);
-            msg.setAccept((showConfirmDialog != 1));
-            sendMessageToServer(msg);
+            try {
+                String strReq = null;
+                strReq = "Do you want to let " + msg.getSender().getAlias() + " join the room?";
+                msg.setType(Message.SEND_RESPONSE_ROOM);
+                int accept = JOptionPane.showConfirmDialog(frmMain, strReq);
+                msg.setReceiver(msg.getSender());
+                msg.setSender(user);
+                msg.setAccept((accept == 0));
+                sendMessageToServer(msg);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        private void responseStreamRequest(Message msg) {
+            try {
+                String strReq = "Do you want to receive a call from " + msg.getSender().getAlias() + "?";
+                msg.setType(Message.SEND_RESPONSE_USER);
+                int accept = JOptionPane.showConfirmDialog(frmMain, strReq);
+                if (accept == 0) {
+                    frmStream = new StreamFrm();
+                    userStream = msg.getSender();
+                    videoSocket = new DatagramSocket();
+                    audioSocket = new DatagramSocket();
+                    videoGrabber = new VideoClientGrabberThread(videoSocket);
+                    videoGrabber.start();
+                    videoListener = new VideoClientListenerThread(videoSocket, frmStream);
+                    videoListener.start();
+                    audioClient = new AudioClient(audioSocket);
+                    frmStream.addWindowListener(new WindowAdapter() {
+                        @Override
+                        public void windowClosing(WindowEvent we) {
+                            closeWindow();
+                        }
+                    });
+                    frmStream.setVisible(true);
+                    msg.setVideoAddressSender(msg.getVideoAddressSender());
+                    msg.setVideoAddressReceiver(new Pair<>(InetAddress.getLocalHost().getHostAddress(), videoSocket.getLocalPort()));
+                    msg.setAddressAudioSender(msg.getAddressAudioSender());
+                    msg.setAddressAudioReceiver(new Pair<>(InetAddress.getLocalHost().getHostAddress(), audioSocket.getLocalPort()));
+                }
+                User prevSender = msg.getSender();
+                msg.setSender(user);
+                msg.setReceiver(prevSender);
+                msg.setAccept(accept == 0);
+                sendMessageToServer(msg);
+//                    new VideoClientListenerThread(streamSocket).start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        private void handleResponseRoom(Message msg) {
+            if (msg.isAccept()) {
+                JOptionPane.showMessageDialog(frmMain, "Your request has been accepted");
+                updateListRoom(msg.getListRooms());
+            } else {
+                JOptionPane.showMessageDialog(frmMain, "sorry your request has been denied");
+            }
+        }
+
+        private void handleResponseStream(Message msg) {
+            if (msg.isAccept()) {
+                userStream = msg.getSender();
+                frmStream = new StreamFrm();
+                frmStream.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent we) {
+                        closeWindow();
+                    }
+                });
+                videoListener = new VideoClientListenerThread(videoSocket, frmStream);
+                videoListener.start();
+                videoGrabber = new VideoClientGrabberThread(videoSocket);
+                videoGrabber.start();
+                audioClient = new AudioClient(audioSocket);
+                frmStream.setVisible(true);
+            } else {
+                JOptionPane.showMessageDialog(frmMain, "Request has been denied");
+            }
+        }
+
+        private void closeWindow() {
+            try {
+                Message msg = new Message();
+                msg.setSender(user);
+                msg.setReceiver(userStream);
+                msg.setType(Message.CLOSE_STREAM);
+                msg.setVideoAddressSender(new Pair<>(InetAddress.getLocalHost().getHostAddress(), videoSocket.getLocalPort()));
+                msg.setAddressAudioSender(new Pair<>(InetAddress.getLocalHost().getHostAddress(), audioSocket.getLocalPort()));
+                sendMessageToServer(msg);
+                videoGrabber.closeVideo();
+                videoListener.closeVideo();
+                audioClient.closeThreads();
+                videoGrabber = null;
+                videoListener = null;
+                audioClient = null;
+                frmStream.dispose();
+                frmStream = null;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        private void endStream(Message msg) {
+            JOptionPane.showMessageDialog(frmStream, "The other user has end the stream");
+            userStream = null;
+            videoGrabber.closeVideo();
+            videoListener.closeVideo();
+            audioClient.closeThreads();
+            videoGrabber = null;
+            videoListener = null;
+            audioClient = null;
+            frmStream.dispose();
+            frmStream = null;
         }
     }
 }

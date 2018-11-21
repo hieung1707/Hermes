@@ -60,7 +60,7 @@ public class ManageRoomFrm extends javax.swing.JFrame {
         }
     }
     
-    public String getSelectedValue() {
+    public String getSelectedRoom() {
         return listRooms.getSelectedValue();
     }
     
